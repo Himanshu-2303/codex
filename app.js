@@ -1339,6 +1339,7 @@ function initializeStageControls() {
     .join('');
 
   stageSegment.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) return;
     const button = event.target.closest('.stage-pill');
     if (!button) return;
 
@@ -1352,16 +1353,34 @@ function initializeStageControls() {
   });
 }
 
-function copyToClipboard(text, buttonEl) {
-  navigator.clipboard.writeText(text).then(() => {
-    const originalLabel = buttonEl.textContent;
+async function copyToClipboard(text, buttonEl) {
+  const originalLabel = buttonEl.textContent;
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const fallbackInput = document.createElement('textarea');
+      fallbackInput.value = text;
+      fallbackInput.setAttribute('readonly', 'true');
+      fallbackInput.style.position = 'absolute';
+      fallbackInput.style.left = '-9999px';
+      document.body.appendChild(fallbackInput);
+      fallbackInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(fallbackInput);
+    }
+
     buttonEl.textContent = 'Copied!';
-    buttonEl.disabled = true;
-    window.setTimeout(() => {
-      buttonEl.textContent = originalLabel;
-      buttonEl.disabled = false;
-    }, 2000);
-  });
+  } catch {
+    buttonEl.textContent = 'Copy Failed';
+  }
+
+  buttonEl.disabled = true;
+  window.setTimeout(() => {
+    buttonEl.textContent = originalLabel;
+    buttonEl.disabled = false;
+  }, 2000);
 }
 
 function createCardElement(message) {
@@ -1393,8 +1412,8 @@ function createCardElement(message) {
   copyBtn.className = 'copy-btn';
   copyBtn.type = 'button';
   copyBtn.textContent = 'Copy';
-  copyBtn.addEventListener('click', () => {
-    copyToClipboard(message.content || '', copyBtn);
+  copyBtn.addEventListener('click', async () => {
+    await copyToClipboard(message.content || '', copyBtn);
   });
 
   card.append(channel, title, content, copyBtn);
@@ -1405,7 +1424,8 @@ function renderCards() {
   cardsPane.innerHTML = '';
 
   const stagedMessages = nukkadViewHRData[activeRole]?.[activeStage] ?? [];
-  const filteredMessages = stagedMessages.filter((message) => {
+  const safeMessages = Array.isArray(stagedMessages) ? stagedMessages : [];
+  const filteredMessages = safeMessages.filter((message) => {
     if (!searchTerm.trim()) return true;
     const haystack = `${message.title} ${message.channel} ${message.content}`.toLowerCase();
     return haystack.includes(searchTerm.toLowerCase());

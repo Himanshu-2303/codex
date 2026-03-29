@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NukkadView Comms Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="hr-sidebar glass-panel" aria-label="Role Selection Sidebar">
+        <h1 class="app-title">NukkadView Comms Hub</h1>
+        <p class="sidebar-subtitle">Internship Role Pipelines</p>
+        <form id="role-form" class="role-list" aria-label="Internship Role Filters"></form>
+      </aside>
+
+      <section class="main-zone">
+        <header class="stage-header glass-panel" aria-label="Stage Filter Bar">
+          <nav class="stage-segment" id="stage-segment" aria-label="Candidate Lifecycle Stages"></nav>
+          <label class="search-wrap" for="global-search">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              id="global-search"
+              name="global-search"
+              type="search"
+              placeholder="Search message templates"
+              autocomplete="off"
+            />
+          </label>
+        </header>
+
+        <main id="cards-pane" class="cards-pane" aria-live="polite" aria-label="Message Templates"></main>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
